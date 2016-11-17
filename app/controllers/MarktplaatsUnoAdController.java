@@ -35,7 +35,7 @@ public class MarktplaatsUnoAdController extends Controller {
         F.Promise<JsonNode> jsonPromise = request.get().map(response -> {
             return response.asJson();
         });
-        return jsonPromise.get(1000);
+        return jsonPromise.get(2000);
     }
 
     public static Result viewCount(String accessToken) {
@@ -44,18 +44,14 @@ public class MarktplaatsUnoAdController extends Controller {
         if(json == null) {
             return badRequest("Expecting Json data");
         } else {
-            JsonNode myAds = json.get("my_ads");
-            if (myAds != null) {
-                int viewCount = myAds.get(0).get("view_ad_count").asInt();
+            JsonNode myAd = json.get("my_ads").get(0);
+            if (myAd != null) {
+                int viewCount = myAd.get("view_ad_count").asInt();
                 return ok(uno.render(viewCount));
             } else {
-                return badRequest("NAN");
+                return ok(uno.render(0));
             }
         }
-    }
-
-    public static Result favoriteCount(String accessToken) {
-        return ok(uno.render(20));
     }
 
     public static Result bidCount(String accessToken) {
