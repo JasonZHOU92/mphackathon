@@ -15,10 +15,9 @@ public class MarktplaatsUnoAdController extends Controller {
 
     private static final String myAdsUrl = "https://api.marktplaats.nl/api3/ads/me.json";
 
-    public static Result update() {
+    public static Result update(String accessToken) {
         Configuration conf = Play.application().configuration();
         String apiVer = conf.getString("api_ver");
-        String accessToken = conf.getString("access_token");
         String session = conf.getString("session");
         String screenWidth = conf.getString("screenWidth");
         String screenHeight = conf.getString("screenHeight");
@@ -46,8 +45,12 @@ public class MarktplaatsUnoAdController extends Controller {
             return badRequest("Expecting Json data");
         } else {
             JsonNode myAds = json.get("my_ads");
-            int viewCount = myAds.get(0).get("view_ad_count").asInt();
-            return ok(uno.render(viewCount));
+            if (myAds != null) {
+                int viewCount = myAds.get(0).get("view_ad_count").asInt();
+                return ok(uno.render(viewCount));
+            } else {
+                return badRequest("NAN");
+            }
         }
     }
 

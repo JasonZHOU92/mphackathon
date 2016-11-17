@@ -9,5 +9,5 @@ GET     /                           controllers.Application.index
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Marktplaats UNO routing configuration
-GET     /update                     controllers.MarktplaatsUnoAdController.update
+GET     /update/:accessToken        controllers.MarktplaatsUnoAdController.update(accessToken : String)
     
