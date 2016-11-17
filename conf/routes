@@ -9,4 +9,6 @@ GET     /                           controllers.Application.index
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Marktplaats UNO routing configuration
-GET     /viewCount/:accessToken        controllers.MarktplaatsUnoAdController.viewCount(accessToken : String)
+GET     /viewCount/:accessToken     controllers.MarktplaatsUnoAdController.viewCount(accessToken : String)
+GET     /bidCount/:accessToken      controllers.MarktplaatsUnoAdController.bidCount(accessToken : String)
+GET     /highestBid/:accessToken      controllers.MarktplaatsUnoAdController.highestBid(accessToken : String)

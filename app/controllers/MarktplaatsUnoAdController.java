@@ -6,7 +6,6 @@ import play.Play;
 import play.libs.F;
 import play.libs.ws.WS;
 import play.libs.ws.WSRequest;
-import play.libs.ws.WSResponse;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.uno;
@@ -23,9 +22,8 @@ public class MarktplaatsUnoAdController extends Controller {
     private static String magicNumber = conf.getString("magic_number");
 //    private static String adId = conf.getString("ad_id");
 
-    public static Result viewCount(String accessToken) {
-        final String myAdsUrl = "https://api.marktplaats.nl/api3/ads/me.json";
-        WSRequest request = WS.client().url(myAdsUrl);
+    private static JsonNode requestJson(String url, String accessToken) {
+        WSRequest request = WS.client().url(url);
         request.setQueryParameter("api_ver", apiVer);
         request.setQueryParameter("access_token", accessToken);
         request.setQueryParameter("session", session);
@@ -33,11 +31,16 @@ public class MarktplaatsUnoAdController extends Controller {
         request.setQueryParameter("screenHeight", screenHeight);
         request.setQueryParameter("app_ver", appVersion);
         request.setQueryParameter("magic_number", magicNumber);
-        F.Promise<WSResponse> responseRequest = request.get();
+
         F.Promise<JsonNode> jsonPromise = request.get().map(response -> {
             return response.asJson();
         });
-        JsonNode json = jsonPromise.get(1000);
+        return jsonPromise.get(1000);
+    }
+
+    public static Result viewCount(String accessToken) {
+        final String myAdsUrl = "https://api.marktplaats.nl/api3/ads/me.json";
+        JsonNode json = requestJson(myAdsUrl, accessToken);
         if(json == null) {
             return badRequest("Expecting Json data");
         } else {
@@ -55,8 +58,32 @@ public class MarktplaatsUnoAdController extends Controller {
         return ok(uno.render(20));
     }
 
-    public static Result bidAmount(String accessToken) {
-        return ok(uno.render(20));
+    public static Result bidCount(String accessToken) {
+        final String myAdsUrl = "https://api.marktplaats.nl/api3/ads/me.json";
+        JsonNode json = requestJson(myAdsUrl, accessToken);
+        JsonNode myAds = json.get("my_ads");
+        String adId = myAds.get(0).get("urn").asText();
+        String adUrl = "https://api.marktplaats.nl/api3/ads/" + adId + ".json";
+
+        JsonNode advertisementJson = requestJson(adUrl, accessToken);
+        int bids = advertisementJson.get("bids").size();
+
+        return ok(uno.render(bids));
+    }
+
+    public static Result highestBid(String accessToken) {
+        final String myAdsUrl = "https://api.marktplaats.nl/api3/ads/me.json";
+        JsonNode json = requestJson(myAdsUrl, accessToken);
+        JsonNode myAds = json.get("my_ads");
+        String adId = myAds.get(0).get("urn").asText();
+        String adUrl = "https://api.marktplaats.nl/api3/ads/" + adId + ".json";
+
+        JsonNode advertisementJson = requestJson(adUrl, accessToken);
+        JsonNode highestBid = advertisementJson.get("bids").get(0);
+        int cents = highestBid.get("value").asInt();
+        int euros = cents / 100;
+
+        return ok(views.html.highestBid.render(euros));
     }
 
 
