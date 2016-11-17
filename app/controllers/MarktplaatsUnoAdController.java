@@ -25,9 +25,6 @@ public class MarktplaatsUnoAdController extends Controller {
         String magicNumber = conf.getString("magic_number");
         String adId = conf.getString("ad_id");
 
-
-
-
         WSRequest request = WS.client().url(myAdsUrl);
         request.setQueryParameter("api_ver", apiVer);
         request.setQueryParameter("access_token", accessToken);
