@@ -1,19 +1,17 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import play.Configuration;
 import play.Play;
-import play.libs.ws.WSClient;
+import play.libs.ws.WS;
+import play.libs.ws.WSRequest;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.uno;
 
-import javax.inject.Inject;
-
 public class MarktplaatsUnoAdController extends Controller {
 
-    @Inject static WSClient ws;
     private static final String myAdsUrl = "https://api.marktplaats.nl/api3/ads/me.json";
-    private static final String accessToken = "e9d8b435-0041-4199-8e0c-5cdd80cc9f7b";
 
     public static Result update() {
         Configuration conf = Play.application().configuration();
@@ -25,10 +23,29 @@ public class MarktplaatsUnoAdController extends Controller {
         String appVersion = conf.getString("app_ver");
         String magicNumber = conf.getString("magic_number");
         String adId = conf.getString("ad_id");
-//        WSRequest request = ws.url(myAdsUrl);
-//        request.setQueryParameter("", )
+
+        WSRequest request = WS.client().url(myAdsUrl);
+        request.setQueryParameter("api_ver", apiVer);
+        request.setQueryParameter("access_token", accessToken);
+        request.setQueryParameter("session", session);
+        request.setQueryParameter("screenWidth", screenWidth);
+        request.setQueryParameter("screenHeight", screenHeight);
+        request.setQueryParameter("app_ver", appVersion);
+        request.setQueryParameter("magic_number", magicNumber);
+
+        JsonNode json = request().body().asJson();
+        if(json == null) {
+            return badRequest("Expecting Json data");
+        } else {
+            String view_ad_count = json.findPath("view_ad_count").textValue();
+            if(view_ad_count == null) {
+                return badRequest("Missing parameter [name]");
+            } else {
+                return ok(uno.render(Integer.parseInt(view_ad_count)));
+            }
+        }
+
 //        return ok(uno.render(20));
-        return ok(uno.render(20));
     }
 
     public static Result apiCall() {
