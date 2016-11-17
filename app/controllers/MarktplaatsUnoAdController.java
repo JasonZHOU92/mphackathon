@@ -62,7 +62,11 @@ public class MarktplaatsUnoAdController extends Controller {
         final String myAdsUrl = "https://api.marktplaats.nl/api3/ads/me.json";
         JsonNode json = requestJson(myAdsUrl, accessToken);
         JsonNode myAds = json.get("my_ads");
-        String adId = myAds.get(0).get("urn").asText();
+        JsonNode myAd = myAds.get(0);
+        if (myAd == null) {
+            return ok(views.html.highestBid.render(0));
+        }
+        String adId = myAd.get("urn").asText();
         String adUrl = "https://api.marktplaats.nl/api3/ads/" + adId + ".json";
 
         JsonNode advertisementJson = requestJson(adUrl, accessToken);
@@ -74,12 +78,18 @@ public class MarktplaatsUnoAdController extends Controller {
     public static Result highestBid(String accessToken) {
         final String myAdsUrl = "https://api.marktplaats.nl/api3/ads/me.json";
         JsonNode json = requestJson(myAdsUrl, accessToken);
-        JsonNode myAds = json.get("my_ads");
-        String adId = myAds.get(0).get("urn").asText();
+        JsonNode myAd = json.get("my_ads").get(0);
+        if (myAd == null) {
+            return ok(views.html.highestBid.render(0));
+        }
+        String adId = myAd.get("urn").asText();
         String adUrl = "https://api.marktplaats.nl/api3/ads/" + adId + ".json";
 
         JsonNode advertisementJson = requestJson(adUrl, accessToken);
         JsonNode highestBid = advertisementJson.get("bids").get(0);
+        if (highestBid == null) {
+            return ok(views.html.highestBid.render(0));
+        }
         int cents = highestBid.get("value").asInt();
         int euros = cents / 100;
 
