@@ -1,14 +1,17 @@
 package controllers;
 
-import play.*;
-import play.mvc.*;
+import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.uno;
 
-import views.html.*;
+public class MarktplaatsUnoController extends Controller {
 
-public class Application extends Controller {
+    public static Result update() {
+        return ok(uno.render(20));
+    }
 
-    public static Result index() {
-        return ok(index.render("Your new application is ready."));
+    public static Result apiCall() {
+        return ok(uno.render(20));
     }
 
 }
