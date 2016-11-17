@@ -3,8 +3,10 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import play.Configuration;
 import play.Play;
+import play.libs.F;
 import play.libs.ws.WS;
 import play.libs.ws.WSRequest;
+import play.libs.ws.WSResponse;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.uno;
@@ -24,6 +26,9 @@ public class MarktplaatsUnoAdController extends Controller {
         String magicNumber = conf.getString("magic_number");
         String adId = conf.getString("ad_id");
 
+
+
+
         WSRequest request = WS.client().url(myAdsUrl);
         request.setQueryParameter("api_ver", apiVer);
         request.setQueryParameter("access_token", accessToken);
@@ -32,20 +37,18 @@ public class MarktplaatsUnoAdController extends Controller {
         request.setQueryParameter("screenHeight", screenHeight);
         request.setQueryParameter("app_ver", appVersion);
         request.setQueryParameter("magic_number", magicNumber);
-
-        JsonNode json = request().body().asJson();
+        F.Promise<WSResponse> responseRequest = request.get();
+        F.Promise<JsonNode> jsonPromise = request.get().map(response -> {
+            return response.asJson();
+        });
+        JsonNode json = jsonPromise.get(1000);
         if(json == null) {
             return badRequest("Expecting Json data");
         } else {
-            String view_ad_count = json.findPath("view_ad_count").textValue();
-            if(view_ad_count == null) {
-                return badRequest("Missing parameter [name]");
-            } else {
-                return ok(uno.render(Integer.parseInt(view_ad_count)));
-            }
+            JsonNode myAds = json.get("my_ads");
+            int viewCount = myAds.get(0).get("view_ad_count").asInt();
+            return ok(uno.render(viewCount));
         }
-
-//        return ok(uno.render(20));
     }
 
     public static Result apiCall() {
