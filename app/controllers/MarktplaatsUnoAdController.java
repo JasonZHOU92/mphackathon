@@ -13,18 +13,18 @@ import views.html.uno;
 
 public class MarktplaatsUnoAdController extends Controller {
 
-    private static final String myAdsUrl = "https://api.marktplaats.nl/api3/ads/me.json";
 
-    public static Result update(String accessToken) {
-        Configuration conf = Play.application().configuration();
-        String apiVer = conf.getString("api_ver");
-        String session = conf.getString("session");
-        String screenWidth = conf.getString("screenWidth");
-        String screenHeight = conf.getString("screenHeight");
-        String appVersion = conf.getString("app_ver");
-        String magicNumber = conf.getString("magic_number");
-        String adId = conf.getString("ad_id");
+    private static Configuration conf = Play.application().configuration();
+    private static String apiVer = conf.getString("api_ver");
+    private static String session = conf.getString("session");
+    private static String screenWidth = conf.getString("screenWidth");
+    private static String screenHeight = conf.getString("screenHeight");
+    private static String appVersion = conf.getString("app_ver");
+    private static String magicNumber = conf.getString("magic_number");
+//    private static String adId = conf.getString("ad_id");
 
+    public static Result viewCount(String accessToken) {
+        final String myAdsUrl = "https://api.marktplaats.nl/api3/ads/me.json";
         WSRequest request = WS.client().url(myAdsUrl);
         request.setQueryParameter("api_ver", apiVer);
         request.setQueryParameter("access_token", accessToken);
@@ -50,6 +50,15 @@ public class MarktplaatsUnoAdController extends Controller {
             }
         }
     }
+
+    public static Result favoriteCount(String accessToken) {
+        return ok(uno.render(20));
+    }
+
+    public static Result bidAmount(String accessToken) {
+        return ok(uno.render(20));
+    }
+
 
     public static Result apiCall() {
         return ok(uno.render(20));
